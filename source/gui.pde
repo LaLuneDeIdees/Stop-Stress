@@ -1,0 +1,219 @@
+/* =========================================================
+ * ====                   WARNING                        ===
+ * =========================================================
+ * The code in this tab has been generated from the GUI form
+ * designer and care should be taken when editing this file.
+ * Only add/edit code inside the event handlers i.e. only
+ * use lines between the matching comment tags. e.g.
+ 
+ void myBtnEvents(GButton button) { //_CODE_:button1:12356:
+ // It is safe to enter your event code here  
+ } //_CODE_:button1:12356:
+ 
+ * Do not rename this tab!
+ * =========================================================
+ */
+
+PImage last_graph;
+float pogoda_copy = gl_pogoda;
+float ground_type_copy = ground_type;
+float emg_copy =0;
+PrintWriter session_output=null;
+long timer =0;
+long sessionstart =0;
+synchronized public void win_draw1(PApplet appc, GWinData data) { //_CODE_:window1:980277:
+  appc.background(255);
+
+  if (view2!=null) {
+    PGraphics pg = view2.getGraphics();
+    if (pg!=null) {
+      pg.beginDraw();
+      pg.background(255);
+      pg.resetMatrix();
+      if (last_graph!=null) {
+        pg.image(last_graph, -1, 0);
+      }
+      while (s!=null && s.active() && s.available()>0) {
+        String datastr = s.readStringUntil('\n');
+        String lines[]=null;
+        if (datastr!=null) {
+          lines= datastr.split(" ");
+        }
+        if (lines!=null && lines.length==2) {
+          float datasl[] = {float(lines[0]), float(lines[1])};
+
+          pg.translate(0, 15/2);
+          pg.scale(1, float(pg.height-15)/pg.height);
+          emg_copy+=(datasl[0]-emg_copy)/50.0;
+          pg.stroke(0, 0, 255);
+          pg.strokeWeight(3);
+          pg.point(pg.width-1, pg.height/2*(1-emg_copy));
+          pg.stroke(0, 255, 255);
+          pg.point(pg.width-1, pg.height/2*(1-datasl[1]));
+          pg.endDraw();
+          last_graph = pg.get();
+
+          pg.beginDraw();
+          float k1, k2, k3, k4;
+
+          pg.strokeWeight(1);
+
+
+          k1 = slider4.getValueF();
+          k2 = slider1.getValueF();
+          k3 = slider2.getValueF();
+          k4 = slider3.getValueF();
+          pg.stroke(255, 0, 0);
+          pg.line(0, k1*(pg.height), pg.width, k1*(pg.height));
+          pg.stroke(255, 128, 0);
+          pg.line(0, k2*(pg.height), pg.width, k2*(pg.height));
+
+
+          pg.stroke(0, 255, 0);
+          pg.line(0, k3*(pg.height), pg.width, k3*(pg.height));
+          pg.stroke(0, 255, 127);
+          pg.line(0, k4*(pg.height), pg.width, k4*(pg.height));
+
+
+          if (isplay) {
+            pogoda_copy = map(emg_copy*0.5+0.5, 1-k2, 1-k1, 0, 100);
+            ground_type_copy = (int)map(datasl[1]*0.5+0.5, 1-k4, 1-k3, 8, 0);
+            if (ground_type_copy>7)ground_type_copy=7;
+            if (ground_type_copy<0)ground_type_copy=0;
+            if (pogoda_copy>100)pogoda_copy=100;
+            if (pogoda_copy<0)pogoda_copy=0;
+            if (session_output!=null) {
+              if (millis()-timer>50) {
+                session_output.println(str((millis()-sessionstart)/1000.0).replace('.', ',')+" "+
+                  str(datasl[0]).replace('.', ',')+" "+
+                  str(datasl[1]).replace('.', ',')+" "+
+                  str(ground_type/7).replace('.', ',')+" "+
+                  str(gl_pogoda/100).replace('.', ','));
+                timer=millis();
+              }
+            }
+          }
+        }
+      }
+      pg.endDraw();
+      view2.draw();
+    }
+  }
+  if (iswin && session_output!=null) {
+    //session_output.println("</g></svg>\n");
+    session_output.close();
+    session_output=null;
+  }
+} //_CODE_:window1:980277:
+
+public void dropList3_click1(GDropList source, GEvent event) { //_CODE_:dropList3:926953:
+  println("dropList3 - GDropList >> GEvent." + event + " @ " + millis());
+} //_CODE_:dropList3:926953:
+
+public void button2_click1(GButton source, GEvent event) { //_CODE_:button2:713520:
+  println("button2 - GButton >> GEvent." + event + " @ " + millis());
+  if (s!=null)s.stop();
+  s = new Serial(this, dropList3.getSelectedText(), 115200);
+} //_CODE_:button2:713520:
+
+public void slider2_change1(GSlider source, GEvent event) { //_CODE_:slider2:459439:
+  println("slider2 - GSlider >> GEvent." + event + " @ " + millis());
+} //_CODE_:slider2:459439:
+
+public void slider3_change1(GSlider source, GEvent event) { //_CODE_:slider3:983166:
+  println("slider3 - GSlider >> GEvent." + event + " @ " + millis());
+
+
+  //String ss[]={" "};
+  //dropList3.setItems(ss, 0);
+} //_CODE_:slider3:983166:
+
+public void slider1_change1(GSlider source, GEvent event) { //_CODE_:slider1:868233:
+  println("slider1 - GSlider >> GEvent." + event + " @ " + millis());
+} //_CODE_:slider1:868233:
+
+public void slider4_change1(GSlider source, GEvent event) { //_CODE_:slider4:711121:
+  println("slider4 - GSlider >> GEvent." + event + " @ " + millis());
+} //_CODE_:slider4:711121:
+
+
+
+// Create all the GUI controls. 
+// autogenerated do not edit
+public void createGUI() {
+  G4P.messagesEnabled(false);
+  G4P.setGlobalColorScheme(GCScheme.CYAN_SCHEME);
+  G4P.setMouseOverEnabled(false);
+  //G4P.setSliderFont("Akaash", G4P.PLAIN, 11);
+  surface.setTitle("Sketch Window");
+  window1 = GWindow.getWindow(this, "Window title", 0, 0, 500, 300, JAVA2D);
+  window1.noLoop();
+  window1.setActionOnClose(G4P.KEEP_OPEN);
+  window1.addDrawHandler(this, "win_draw1");
+  dropList3 = new GDropList(window1, 40, 20, 300, 220, 10, 10);
+  String ss[]={" "};
+  dropList3.setItems(ss, 0);
+  dropList3.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  dropList3.addEventHandler(this, "dropList3_click1");
+  button2 = new GButton(window1, 340, 0, 100, 40);
+  button2.setText("Подключить");
+  button2.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  button2.addEventHandler(this, "button2_click1");
+  label1 = new GLabel(window1, 40, 0, 300, 20);
+  label1.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  label1.setText("Порт");
+  label1.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  label1.setOpaque(false);
+  slider2 = new GSlider(window1, 490, 50, 240, 10, 10.0);
+  slider2.setRotation(PI/2, GControlMode.CORNER);
+  slider2.setLimits(0.0, 0.0, 1.0);
+  slider2.setNumberFormat(G4P.DECIMAL, 2);
+  slider2.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  slider2.setOpaque(false);
+  slider2.addEventHandler(this, "slider2_change1");
+  slider3 = new GSlider(window1, 500, 50, 240, 10, 10.0);
+  slider3.setRotation(PI/2, GControlMode.CORNER);
+  slider3.setLimits(1, 0.0, 1.0);
+  slider3.setNumberFormat(G4P.DECIMAL, 2);
+  slider3.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  slider3.setOpaque(false);
+  slider3.addEventHandler(this, "slider3_change1");
+  label2 = new GLabel(window1, 480, 30, 20, 20);
+  label2.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  label2.setText("t");
+  label2.setOpaque(false);
+  label3 = new GLabel(window1, 0, 30, 40, 20);
+  label3.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  label3.setText("EMG");
+  label3.setOpaque(false);
+  slider1 = new GSlider(window1, 20, 50, 240, 10, 10.0);
+  slider1.setRotation(PI/2, GControlMode.CORNER);
+  slider1.setLimits(1, 0.0, 1.0);
+  slider1.setNumberFormat(G4P.DECIMAL, 2);
+  slider1.setOpaque(false);
+  slider1.addEventHandler(this, "slider1_change1");
+  slider4 = new GSlider(window1, 10, 50, 240, 10, 10.0);
+  slider4.setRotation(PI/2, GControlMode.CORNER);
+  slider4.setLimits(0, 0.0, 1.0);
+  slider4.setNumberFormat(G4P.DECIMAL, 2);
+  slider4.setOpaque(false);
+  slider4.addEventHandler(this, "slider4_change1");
+  view2 = new GView(window1, 20, 50, 460, 240, JAVA2D);
+  view2.setLocalColorScheme(GCScheme.BLUE_SCHEME);
+  window1.loop();
+  //G4P.messagesEnabled(false);
+}
+
+// Variable declarations 
+// autogenerated do not edit
+GWindow window1;
+GDropList dropList3; 
+GButton button2; 
+GLabel label1; 
+GSlider slider2; 
+GSlider slider3; 
+GView view2; 
+GLabel label2; 
+GLabel label3; 
+GSlider slider1; 
+GSlider slider4; 
